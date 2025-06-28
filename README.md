@@ -1,10 +1,3 @@
----
-tags:
-- finance
-- code
-- reinforcement-learning
-- agentic-ai
----
 # Algorithmic Trading System
 
 A comprehensive algorithmic trading system with synthetic data generation, comprehensive logging, and extensive testing capabilities.
