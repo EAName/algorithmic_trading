@@ -1,0 +1,62 @@
+2025-06-25 09:57:33,694 - agentic_ai_system.data_ingestion - ERROR - _generate_synthetic_data:90 - Error generating synthetic data: Unsupported frequency: 1m
+Traceback (most recent call last):
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 75, in _generate_synthetic_data
+    df = generator.generate_ohlcv_data(
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/synthetic_data_generator.py", line 58, in generate_ohlcv_data
+    raise ValueError(f"Unsupported frequency: {frequency}")
+ValueError: Unsupported frequency: 1m
+2025-06-25 09:57:33,696 - agentic_ai_system.data_ingestion - ERROR - load_data:33 - Error in data ingestion: Unsupported frequency: 1m
+Traceback (most recent call last):
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 26, in load_data
+    return _load_csv_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 42, in _load_csv_data
+    return _generate_synthetic_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 75, in _generate_synthetic_data
+    df = generator.generate_ohlcv_data(
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/synthetic_data_generator.py", line 58, in generate_ohlcv_data
+    raise ValueError(f"Unsupported frequency: {frequency}")
+ValueError: Unsupported frequency: 1m
+2025-06-25 09:57:33,696 - agentic_ai_system.orchestrator - ERROR - run:88 - Error in trading workflow: Unsupported frequency: 1m
+Traceback (most recent call last):
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/orchestrator.py", line 38, in run
+    data = load_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 26, in load_data
+    return _load_csv_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 42, in _load_csv_data
+    return _generate_synthetic_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 75, in _generate_synthetic_data
+    df = generator.generate_ohlcv_data(
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/synthetic_data_generator.py", line 58, in generate_ohlcv_data
+    raise ValueError(f"Unsupported frequency: {frequency}")
+ValueError: Unsupported frequency: 1m
+2025-06-25 09:57:33,698 - agentic_ai_system.data_ingestion - ERROR - _generate_synthetic_data:90 - Error generating synthetic data: Unsupported frequency: 1m
+Traceback (most recent call last):
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 75, in _generate_synthetic_data
+    df = generator.generate_ohlcv_data(
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/synthetic_data_generator.py", line 58, in generate_ohlcv_data
+    raise ValueError(f"Unsupported frequency: {frequency}")
+ValueError: Unsupported frequency: 1m
+2025-06-25 09:57:33,698 - agentic_ai_system.data_ingestion - ERROR - load_data:33 - Error in data ingestion: Unsupported frequency: 1m
+Traceback (most recent call last):
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 26, in load_data
+    return _load_csv_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 42, in _load_csv_data
+    return _generate_synthetic_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 75, in _generate_synthetic_data
+    df = generator.generate_ohlcv_data(
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/synthetic_data_generator.py", line 58, in generate_ohlcv_data
+    raise ValueError(f"Unsupported frequency: {frequency}")
+ValueError: Unsupported frequency: 1m
+2025-06-25 09:57:33,698 - agentic_ai_system.orchestrator - ERROR - run_backtest:197 - Error in backtest: Unsupported frequency: 1m
+Traceback (most recent call last):
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/orchestrator.py", line 116, in run_backtest
+    data = load_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 26, in load_data
+    return _load_csv_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 42, in _load_csv_data
+    return _generate_synthetic_data(config)
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/data_ingestion.py", line 75, in _generate_synthetic_data
+    df = generator.generate_ohlcv_data(
+  File "/Users/edwin/Desktop/Edwin/Github/algorithmic_trading/agentic_ai_system/synthetic_data_generator.py", line 58, in generate_ohlcv_data
+    raise ValueError(f"Unsupported frequency: {frequency}")
+ValueError: Unsupported frequency: 1m
