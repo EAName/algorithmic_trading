@@ -289,10 +289,203 @@ The system includes robust error handling:
 4. Ensure all tests pass
 5. Submit a pull request
 
-## License
+### License
+This project is dual-licensed.
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+• NON-COMMERCIAL USE → PolyForm Noncommercial License 1.0.0  
+  # PolyForm Noncommercial License 1.0.0
+<https://polyformproject.org/licenses/noncommercial/1.0.0>
 
-## Disclaimer
+## Acceptance
+In order to get any license under these terms, you must agree to them as
+both strict obligations and conditions to all your licenses.
 
-This is a simulation system for educational and testing purposes. It is not intended for real trading and should not be used with real money. Always test thoroughly before using any trading system with real funds. 
+## Copyright License
+The licensor grants you a copyright license for the software to do
+everything you might do with the software that would otherwise infringe
+the licensor's copyright in it for any permitted purpose. However, you
+may only distribute the software according to **Distribution License**
+and make changes or new works based on the software according to
+**Changes and New Works License**.
+
+## Distribution License
+The licensor grants you an additional copyright license to distribute
+copies of the software. Your license to distribute covers distributing
+the software with changes and new works permitted by **Changes and New
+Works License**.
+
+## Notices
+You must ensure that anyone who gets a copy of any part of the software
+from you also gets a copy of these terms or the URL for them above, as
+well as copies of any plain-text lines beginning with `Required Notice:`
+that the licensor provided with the software. For example:
+
+> Required Notice: Copyright Yoyodyne, Inc.
+
+## Changes and New Works License
+The licensor grants you an additional copyright license to make changes
+and new works based on the software for any permitted purpose.
+
+## Patent License
+The licensor grants you a patent license for the software that covers
+patent claims the licensor can license, or becomes able to license, that
+you would infringe by using the software.
+
+## Noncommercial Purposes
+Any noncommercial purpose is a permitted purpose.
+
+## Personal Uses
+Personal use for research, experiment, and testing for the benefit of
+public knowledge, personal study, private entertainment, hobby projects,
+amateur pursuits, or religious observance, without any anticipated
+commercial application, is use for a permitted purpose.
+
+## Noncommercial Organizations
+Use by any charitable organization, educational institution, public
+research organization, public safety or health organization,
+environmental protection organization, or government institution is use
+for a permitted purpose regardless of the source of funding or
+obligations resulting from the funding.
+
+## Fair Use
+You may have “fair use” rights for the software under the law. These
+terms do not limit them.
+
+## No Other Rights
+These terms do not allow you to sublicense or transfer any of your
+licenses to anyone else, or prevent the licensor from granting licenses
+to anyone else. These terms do not imply any other licenses.
+
+## Patent Defense
+If you make any written claim that the software infringes or contributes
+to infringement of any patent, your patent license for the software
+granted under these terms ends immediately. If your company makes such a
+claim, your patent license ends immediately for work on behalf of your
+company.
+
+## Violations
+The first time you are notified in writing that you have violated any of
+these terms, or done anything with the software not covered by your
+licenses, your licenses can nonetheless continue if you come into full
+compliance with these terms, and take practical steps to correct past
+violations, within 32 days of receiving notice. Otherwise, all your
+licenses end immediately.
+
+## No Liability
+**As far as the law allows, the software comes as-is, without any
+warranty or condition, and the licensor will not be liable to you for
+any damages arising out of these terms or the use or nature of the
+software, under any kind of legal claim.**
+
+## Definitions
+The **licensor** is the individual or entity offering these terms, and
+the **software** is the software the licensor makes available under
+these terms. **You** refers to the individual or entity agreeing to
+these terms. **Your company** is any legal entity, sole proprietorship,
+or other kind of organization that you work for, plus all organizations
+that have control over, are under the control of, or are under common
+control with that organization. **Control** means ownership of
+substantially all the assets of an entity, or the power to direct its
+management and policies by vote, contract, or otherwise. Control can be
+direct or indirect. **Your licenses** are all the licenses granted to
+you for the software under these terms. **Use** means anything you do
+with the software requiring one of your licenses.
+
+• COMMERCIAL USE → Parallel LLC Commercial License v1.0  
+  Parallel LLC Commercial License v1.0
+====================================
+
+IMPORTANT—READ CAREFULLY.  This Commercial License (“Agreement”) is a
+legal contract between Parallel LLC (“Licensor”) and the licensee
+identified in the Order Form or invoice (“Licensee”).  By installing,
+copying, accessing, or otherwise using the Software, Licensee agrees to
+be bound by this Agreement.
+
+1.  Definitions
+    1.1 “Software” means the source code, object code, scripts, models,
+         and all accompanying documentation found in this repository.
+    1.2 “Authorized Users” means Licensee’s employees or contractors who
+         are bound by written agreement to terms no less protective of
+         Licensor’s rights than this Agreement.
+    1.3 “Derivative Work” has the meaning set forth in 17 U.S.C. § 101.
+
+2.  Grant of License
+    2.1 **Production Use.**  Subject to payment of all applicable fees,
+         Licensor grants Licensee a worldwide, non-exclusive,
+         non-transferable license to (a) use, reproduce, and modify the
+         Software, and (b) distribute the Software and Derivative Works
+         as part of Licensee’s products or services, including
+         software-as-a-service (SaaS).
+    2.2 **Sublicensing.**  Licensee may sublicense distribution rights
+         under Section 2.1(b) to its end customers solely in executable
+         form and only pursuant to terms at least as protective of
+         Licensor as this Agreement.
+    2.3 **Reservation of Rights.**  All rights not expressly granted are
+         reserved by Licensor.
+
+3.  Fees & Payment
+    3.1 License fees are specified in the Order Form and are due within
+         thirty (30) days of invoice.  Late payments accrue interest at
+         1.5 % per month or the maximum allowed by law, whichever is
+         less.
+
+4.  Support & Updates
+    4.1 Licensor will provide commercially reasonable support during the
+         term purchased.  Updates are provided at Licensor’s discretion
+         and are governed by this Agreement unless accompanied by a new
+         license.
+
+5.  Confidentiality
+    5.1 The Software and any non-public documentation are “Confidential
+         Information.”  Licensee will not disclose Confidential
+         Information except to Authorized Users and will protect it with
+         at least the same care used for its own secrets.
+
+6.  Intellectual-Property Protection
+    6.1 Licensee shall not remove or alter any copyright, trademark, or
+         proprietary notices.
+    6.2 Licensee shall defend, indemnify, and hold harmless Licensor
+         from any claim arising out of Licensee’s use or distribution of
+         the Software.
+
+7.  Warranty Disclaimer
+    7.1 THE SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND,
+         EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE IMPLIED
+         WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+         PURPOSE, AND NON-INFRINGEMENT.
+
+8.  Limitation of Liability
+    8.1 LICENSOR WILL NOT BE LIABLE FOR ANY INDIRECT, SPECIAL,
+         INCIDENTAL, OR CONSEQUENTIAL DAMAGES, OR LOST PROFITS, ARISING
+         OUT OF OR RELATED TO THIS AGREEMENT, EVEN IF ADVISED OF THE
+         POSSIBILITY OF SUCH DAMAGES.  LICENSOR’S TOTAL LIABILITY SHALL
+         NOT EXCEED THE FEES PAID BY LICENSEE IN THE TWELVE (12) MONTHS
+         PRECEDING THE CLAIM.
+
+9.  Term & Termination
+    9.1 This Agreement begins on the Effective Date and continues for
+         the term stated in the Order Form unless terminated earlier.
+    9.2 Either party may terminate for material breach after thirty (30)
+         days’ written notice if the breach is not cured.
+    9.3 Upon termination, all rights granted to Licensee cease, and
+         Licensee must destroy all copies of the Software in its
+         possession.
+
+10. Governing Law & Dispute Resolution
+    10.1 This Agreement is governed by the laws of the Commonwealth of
+          Virginia, U.S.A., without regard to conflict-of-law rules.
+    10.2 Any dispute shall be resolved by binding arbitration in
+          Fairfax County, Virginia, under the Commercial Arbitration
+          Rules of the American Arbitration Association.
+
+11. Entire Agreement; Amendments
+    11.1 This Agreement, together with any Order Form, constitutes the
+          complete and exclusive understanding between the parties and
+          supersedes all prior proposals and agreements.  Any amendment
+          must be in writing and signed by both parties.
+
+© 2025 Parallel LLC.  All rights reserved.  
+  To obtain a paid commercial license, e-mail <edwinsalguero@parallelLLC.com>.
+
+© 2025 Parallel LLC
+---
