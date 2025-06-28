@@ -33,7 +33,7 @@ A comprehensive algorithmic trading system with synthetic data generation, compr
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/ParallelLLC/algorithmic_trading
 cd algorithmic_trading
 ```
 
