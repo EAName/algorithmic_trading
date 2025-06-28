@@ -2,6 +2,8 @@
 tags:
 - finance
 - code
+- reinforcement-learning
+- agentic-ai
 ---
 # Algorithmic Trading System
 
