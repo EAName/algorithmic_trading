@@ -1,16 +1,3 @@
----
-tags:
-- finance
-- code
-- reinforcement-learning
-- agentic-ai
-- real-time-trading
-- alpaca-markets
-- algorithmic-trading
-- multi-symbol-trading
-- technical-analysis
-- risk-management
----
 # Algorithmic Trading System
 
 A comprehensive, production-ready algorithmic trading system with real-time market data streaming, multi-symbol trading, advanced technical analysis, and robust risk management capabilities.
