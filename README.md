@@ -99,7 +99,7 @@ algorithmic_trading/
 
 1. **Clone the repository:**
 ```bash
-git clone <repository-url>
+git clone https://github.com/ParallelLLC/algorithmic_trading
 cd algorithmic_trading
 ```
 
