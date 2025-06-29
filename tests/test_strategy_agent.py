@@ -12,7 +12,8 @@ class TestStrategyAgent:
         """Sample configuration for testing"""
         return {
             'trading': {
-                'symbol': 'AAPL',
+                'symbols': ['AAPL'],
+                'primary_symbol': 'AAPL',
                 'timeframe': '1min',
                 'capital': 100000
             },
@@ -66,7 +67,7 @@ class TestStrategyAgent:
     
     def test_initialization(self, strategy_agent, config):
         """Test agent initialization"""
-        assert strategy_agent.symbol == config['trading']['symbol']
+        assert strategy_agent.primary_symbol == config['trading']['primary_symbol']
         assert strategy_agent.capital == config['trading']['capital']
         assert strategy_agent.max_position == config['risk']['max_position']
         assert strategy_agent.max_drawdown == config['risk']['max_drawdown']
@@ -82,13 +83,19 @@ class TestStrategyAgent:
         assert 'quantity' in signal
         assert 'price' in signal
         assert 'confidence' in signal
+        assert 'timestamp' in signal
+        assert 'indicators' in signal
         
-        # Check action values
+        # Check signal values
         assert signal['action'] in ['buy', 'sell', 'hold']
-        assert signal['symbol'] == strategy_agent.symbol
+        assert signal['symbol'] == strategy_agent.primary_symbol
         assert signal['quantity'] >= 0
         assert signal['price'] > 0
         assert 0 <= signal['confidence'] <= 1
+        
+        # Check indicators
+        indicators = signal['indicators']
+        assert isinstance(indicators, dict)
     
     def test_act_with_empty_data(self, strategy_agent):
         """Test signal generation with empty data"""
@@ -171,13 +178,14 @@ class TestStrategyAgent:
     
     def test_generate_no_action_signal(self, strategy_agent):
         """Test no-action signal generation"""
-        signal = strategy_agent._generate_no_action_signal()
+        signal = strategy_agent._generate_no_action_signal(strategy_agent.primary_symbol)
         
         assert signal['action'] == 'hold'
         assert signal['quantity'] == 0
         assert signal['price'] == 0
         assert signal['confidence'] == 0.0
-        assert signal['symbol'] == strategy_agent.symbol
+        assert signal['timestamp'] is None
+        assert signal['indicators'] == {}
     
     def test_signal_generation_logic(self, strategy_agent, sample_data):
         """Test signal generation logic with different market conditions"""

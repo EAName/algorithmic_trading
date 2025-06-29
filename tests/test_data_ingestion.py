@@ -25,28 +25,35 @@ class TestDataIngestion:
                 'data_path': 'data/synthetic_market_data.csv'
             },
             'trading': {
-                'symbol': 'AAPL',
-                'timeframe': '1min'
+                'symbols': ['AAPL'],
+                'primary_symbol': 'AAPL',
+                'timeframe': '1min',
+                'capital': 100000
             }
         }
     
     @pytest.fixture
     def sample_csv_data(self):
-        """Create sample CSV data for testing"""
+        """Create sample CSV data for testing with always valid OHLCV relationships"""
         dates = pd.date_range(start='2024-01-01', periods=100, freq='1min')
-        
         data = []
         for i, date in enumerate(dates):
             base_price = 150.0 + (i * 0.1)
+            spread = abs(np.random.normal(0, 2)) + 0.01  # always positive
+            open_price = base_price + np.random.normal(0, 0.5)
+            close_price = base_price + np.random.normal(0, 0.5)
+            high_price = max(open_price, close_price) + abs(np.random.normal(0, 0.5))
+            low_price = min(open_price, close_price) - abs(np.random.normal(0, 0.5))
+            # Ensure high >= low
+            high_price = max(high_price, low_price + 0.01)
             data.append({
                 'timestamp': date,
-                'open': base_price + np.random.normal(0, 1),
-                'high': base_price + abs(np.random.normal(0, 2)),
-                'low': base_price - abs(np.random.normal(0, 2)),
-                'close': base_price + np.random.normal(0, 1),
+                'open': round(open_price, 4),
+                'high': round(high_price, 4),
+                'low': round(low_price, 4),
+                'close': round(close_price, 4),
                 'volume': np.random.randint(1000, 100000)
             })
-        
         return pd.DataFrame(data)
     
     def test_load_data_csv_type(self, config, sample_csv_data):
@@ -149,7 +156,7 @@ class TestDataIngestion:
     
     def test_generate_synthetic_data(self, config):
         """Test synthetic data generation"""
-        with patch('agentic_ai_system.synthetic_data_generator.SyntheticDataGenerator') as mock_generator_class:
+        with patch('agentic_ai_system.data_ingestion.SyntheticDataGenerator') as mock_generator_class:
             mock_generator = MagicMock()
             mock_generator_class.return_value = mock_generator
             
@@ -166,7 +173,12 @@ class TestDataIngestion:
             result = _generate_synthetic_data(config)
             
             assert isinstance(result, pd.DataFrame)
-            mock_generator.generate_ohlcv_data.assert_called_once()
+            mock_generator.generate_ohlcv_data.assert_called_once_with(
+                symbol=config['trading']['primary_symbol'],
+                start_date='2024-01-01',
+                end_date='2024-12-31',
+                frequency=config['trading']['timeframe']
+            )
             mock_generator.save_to_csv.assert_called_once()
     
     def test_validate_data_valid(self, sample_csv_data):
@@ -272,7 +284,7 @@ class TestDataIngestion:
     def test_synthetic_data_directory_creation(self, config):
         """Test that synthetic data directory is created if it doesn't exist"""
         with patch('os.makedirs') as mock_makedirs:
-            with patch('agentic_ai_system.synthetic_data_generator.SyntheticDataGenerator') as mock_generator_class:
+            with patch('agentic_ai_system.data_ingestion.SyntheticDataGenerator') as mock_generator_class:
                 mock_generator = MagicMock()
                 mock_generator_class.return_value = mock_generator
                 

@@ -1,22 +1,38 @@
 # Configuration file for the agentic AI trading system
 data_source:
-  type: 'csv'
+  type: 'realtime'  # Options: 'csv', 'synthetic', 'realtime'
   path: 'data/market_data.csv'
 
+# Alpaca Markets configuration
+alpaca:
+  api_key: 'PKVPDIN9V6OZ846YWES1'
+  secret_key: 'nKoPr09AGBG48X2m2x6lhcWhQAPjX13BZfaIraG7'
+  base_url: 'wss://stream.data.alpaca.markets'  # Use wss://stream.data.sandbox.alpaca.markets for sandbox
+  paper_trading: true  # Set to false for live trading
+
 trading:
-  symbol: 'AAPL'
+  symbols: ['AAPL', 'META', 'AMZN', 'GOOG', 'NFLX']  # Multiple symbols to track
+  primary_symbol: 'AAPL'  # Primary symbol for strategy focus
   timeframe: '1m'
   capital: 100000
+
+# Real-time data configuration
+realtime_data:
+  start_date: '2024-01-01'
+  end_date: '2024-12-31'
+  buffer_size: 100  # Number of data points to keep in memory
+  auto_reconnect: true
+  reconnect_delay: 5  # seconds
 
 risk:
   max_position: 100
   max_drawdown: 0.05
 
 execution:
-  broker_api: 'paper'
+  broker_api: 'alpaca'  # Changed from 'paper' to 'alpaca'
   order_size: 10
 
-# Synthetic data generation settings
+# Synthetic data generation settings (fallback)
 synthetic_data:
   base_price: 150.0
   volatility: 0.02

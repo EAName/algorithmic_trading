@@ -73,10 +73,17 @@ class SyntheticDataGenerator:
             open_price = current_price * (1 + noise)
             close_price = open_price * (1 + np.random.normal(0, self.volatility))
             
+            # Ensure prices are positive
+            open_price = max(open_price, 0.01)  # Minimum price of 1 cent
+            close_price = max(close_price, 0.01)
+            
             # Generate high and low
             price_range = abs(close_price - open_price) * np.random.uniform(1.5, 3.0)
             high_price = max(open_price, close_price) + price_range * np.random.uniform(0, 0.5)
             low_price = min(open_price, close_price) - price_range * np.random.uniform(0, 0.5)
+            
+            # Ensure low price is positive
+            low_price = max(low_price, 0.01)
             
             # Generate volume (correlated with price movement)
             volume = np.random.randint(1000, 100000) * (1 + abs(close_price - open_price) / open_price)

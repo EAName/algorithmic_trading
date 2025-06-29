@@ -2,7 +2,7 @@ import logging
 import time
 import pandas as pd
 from typing import Dict, Any, Optional
-from .data_ingestion import load_data, validate_data
+from .data_ingestion import load_data, validate_data, start_realtime_stream, stop_realtime_stream, get_realtime_data_stream
 from .strategy_agent import StrategyAgent
 from .execution_agent import ExecutionAgent
 
@@ -197,48 +197,68 @@ def run_backtest(config: Dict[str, Any], start_date: str = '2024-01-01', end_dat
         logger.error(f"Error in backtest: {e}", exc_info=True)
         return {'success': False, 'error': str(e)}
 
-def run_live_trading(config: Dict[str, Any], duration_minutes: int = 60) -> Dict[str, Any]:
+def run_realtime_trading(config: Dict[str, Any], duration_minutes: int = 60) -> Dict[str, Any]:
     """
-    Run live trading simulation for a specified duration.
+    Run real-time trading with live market data.
     
     Args:
         config: Configuration dictionary
-        duration_minutes: Duration to run live trading in minutes
+        duration_minutes: Duration to run trading (in minutes)
         
     Returns:
-        Dictionary containing live trading results
+        Dictionary containing trading results
     """
-    logger.info(f"Starting live trading simulation for {duration_minutes} minutes")
+    logger.info(f"Starting real-time trading for {duration_minutes} minutes")
     
     try:
-        import time
-        from datetime import datetime, timedelta
+        # Initialize agents
+        strategy_agent = StrategyAgent(config)
+        execution_agent = ExecutionAgent(config)
         
-        end_time = datetime.now() + timedelta(minutes=duration_minutes)
+        # Set up real-time data callback
+        def data_callback(data_type: str, data: Dict):
+            """Callback for real-time data updates"""
+            try:
+                strategy_agent.process_realtime_data(data_type, data)
+            except Exception as e:
+                logger.error(f"Error in data callback: {e}")
+        
+        # Start real-time data stream
+        start_realtime_stream(config, data_callback)
+        
+        # Track trading results
         trades = []
+        start_time = time.time()
+        end_time = start_time + (duration_minutes * 60)
         
-        while datetime.now() < end_time:
-            # Run single trading cycle
-            result = run(config)
-            
-            if result['order_executed'] and result['execution_result']['success']:
-                trades.append(result['execution_result'])
-            
-            # Wait before next cycle
-            time.sleep(60)  # Wait 1 minute between cycles
+        logger.info("Real-time trading started. Press Ctrl+C to stop early.")
         
-        live_results = {
+        try:
+            while time.time() < end_time:
+                # Check for new signals from strategy agent
+                # The strategy agent processes data asynchronously via callbacks
+                time.sleep(1)  # Check every second
+                
+        except KeyboardInterrupt:
+            logger.info("Real-time trading stopped by user")
+        
+        # Stop real-time stream
+        stop_realtime_stream(config)
+        
+        # Get final statistics
+        trading_results = {
             'success': True,
             'duration_minutes': duration_minutes,
             'total_trades': len(trades),
             'trades': trades,
-            'start_time': datetime.now() - timedelta(minutes=duration_minutes),
-            'end_time': datetime.now()
+            'start_time': start_time,
+            'end_time': time.time()
         }
         
-        logger.info(f"Live trading completed: {len(trades)} trades executed")
-        return live_results
+        logger.info(f"Real-time trading completed: {len(trades)} trades executed")
+        return trading_results
         
     except Exception as e:
-        logger.error(f"Error in live trading: {e}", exc_info=True)
+        logger.error(f"Error in real-time trading: {e}", exc_info=True)
+        stop_realtime_stream(config)
         return {'success': False, 'error': str(e)}

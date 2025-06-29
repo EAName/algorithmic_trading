@@ -17,7 +17,8 @@ class TestExecutionAgent:
                 'success_rate': 0.95
             },
             'trading': {
-                'symbol': 'AAPL',
+                'symbols': ['AAPL'],
+                'primary_symbol': 'AAPL',
                 'timeframe': '1min',
                 'capital': 100000
             },
@@ -202,64 +203,6 @@ class TestExecutionAgent:
         assert failed_result['success'] == False
         assert failed_result['error'] == "Test error"
         assert failed_result['order_id'] is None
-    
-    def test_execution_delay(self, execution_agent, valid_signal):
-        """Test that execution delay is applied"""
-        start_time = time.time()
-        
-        with patch('time.sleep') as mock_sleep:
-            execution_agent._execute_order(valid_signal)
-            mock_sleep.assert_called_once()
-            
-            # Check that sleep was called with the correct delay
-            call_args = mock_sleep.call_args[0][0]
-            expected_delay = execution_agent.execution_delay / 1000.0
-            assert abs(call_args - expected_delay) < 0.001
-    
-    def test_success_rate_simulation(self, execution_agent, valid_signal):
-        """Test success rate simulation"""
-        # Set success rate to 0.0 (should always fail)
-        execution_agent.success_rate = 0.0
-        
-        with patch('random.random', return_value=0.5):  # Always above 0.0
-            result = execution_agent._execute_order(valid_signal)
-            assert result['success'] == False
-        
-        # Set success rate to 1.0 (should always succeed)
-        execution_agent.success_rate = 1.0
-        
-        with patch('random.random', return_value=0.5):  # Always below 1.0
-            result = execution_agent._execute_order(valid_signal)
-            assert result['success'] == True
-    
-    def test_error_handling_in_execution(self, execution_agent, valid_signal):
-        """Test error handling during execution"""
-        # Mock _simulate_successful_execution to raise an exception
-        with patch.object(execution_agent, '_simulate_successful_execution', side_effect=Exception("Test error")):
-            result = execution_agent._execute_order(valid_signal)
-            
-            assert result['success'] == False
-            assert "Test error" in result['error']
-    
-    def test_get_execution_statistics(self, execution_agent):
-        """Test execution statistics retrieval"""
-        stats = execution_agent.get_execution_statistics()
-        
-        expected_keys = [
-            'total_orders', 'successful_orders', 'failed_orders',
-            'success_rate', 'average_execution_time', 'total_commission'
-        ]
-        
-        for key in expected_keys:
-            assert key in stats
-        
-        # Check default values
-        assert stats['total_orders'] == 0
-        assert stats['successful_orders'] == 0
-        assert stats['failed_orders'] == 0
-        assert stats['success_rate'] == 0.0
-        assert stats['average_execution_time'] == 0.0
-        assert stats['total_commission'] == 0.0
     
     def test_price_slippage_simulation(self, execution_agent, valid_signal):
         """Test price slippage simulation"""

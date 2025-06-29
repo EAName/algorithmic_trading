@@ -10,6 +10,22 @@ class ExecutionAgent(Agent):
         self.order_size = config['execution']['order_size']
         self.execution_delay = config.get('execution', {}).get('delay_ms', 100)
         self.success_rate = config.get('execution', {}).get('success_rate', 0.95)
+        
+        # Initialize Alpaca client if using real trading
+        self.alpaca_client = None
+        if self.broker_api == 'alpaca':
+            try:
+                from alpaca.trading.client import TradingClient
+                self.alpaca_client = TradingClient(
+                    api_key=config['alpaca']['api_key'],
+                    secret_key=config['alpaca']['secret_key'],
+                    paper=config['alpaca'].get('paper_trading', True)
+                )
+                self.logger.info("Alpaca trading client initialized")
+            except Exception as e:
+                self.logger.error(f"Failed to initialize Alpaca client: {e}")
+                self.broker_api = 'simulation'  # Fallback to simulation
+        
         self.logger.info(f"Execution agent initialized with {self.broker_api} broker")
     
     def act(self, signal: Dict[str, Any]) -> Dict[str, Any]:
@@ -30,8 +46,11 @@ class ExecutionAgent(Agent):
                 self.logger.warning("Invalid signal received, skipping execution")
                 return self._generate_execution_result(signal, success=False, error="Invalid signal")
             
-            # Simulate order execution
-            execution_result = self._execute_order(signal)
+            # Execute order based on broker type
+            if self.broker_api == 'alpaca' and self.alpaca_client:
+                execution_result = self._execute_alpaca_order(signal)
+            else:
+                execution_result = self._execute_simulation_order(signal)
             
             # Log execution result
             self.log_action(execution_result)
@@ -74,7 +93,54 @@ class ExecutionAgent(Agent):
             self.log_error(e, "Error validating signal")
             return False
     
-    def _execute_order(self, signal: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_alpaca_order(self, signal: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute order using Alpaca API"""
+        try:
+            from alpaca.trading.requests import MarketOrderRequest
+            from alpaca.trading.enums import OrderSide, TimeInForce
+            
+            if signal['action'] == 'hold':
+                return self._generate_execution_result(signal, success=True, error=None)
+            
+            # Create order request
+            order_data = MarketOrderRequest(
+                symbol=signal['symbol'],
+                qty=signal['quantity'],
+                side=OrderSide.BUY if signal['action'] == 'buy' else OrderSide.SELL,
+                time_in_force=TimeInForce.DAY
+            )
+            
+            # Submit order
+            order = self.alpaca_client.submit_order(order_data)
+            
+            # Wait for order to be processed
+            time.sleep(1)
+            
+            # Get order status
+            order_status = self.alpaca_client.get_order_by_id(order.id)
+            
+            if order_status.status == 'filled':
+                return {
+                    'order_id': order.id,
+                    'status': 'filled',
+                    'action': signal['action'],
+                    'symbol': signal['symbol'],
+                    'quantity': signal['quantity'],
+                    'price': float(order_status.filled_avg_price) if order_status.filled_avg_price else signal.get('price', 0),
+                    'execution_time': time.time(),
+                    'commission': 0,  # Alpaca doesn't charge commissions for stock trades
+                    'total_value': round(signal['quantity'] * float(order_status.filled_avg_price), 2) if order_status.filled_avg_price else 0,
+                    'success': True,
+                    'error': None
+                }
+            else:
+                return self._generate_execution_result(signal, success=False, error=f"Order status: {order_status.status}")
+                
+        except Exception as e:
+            self.log_error(e, f"Error executing Alpaca order for {signal['symbol']}")
+            return self._generate_execution_result(signal, success=False, error=str(e))
+    
+    def _execute_simulation_order(self, signal: Dict[str, Any]) -> Dict[str, Any]:
         """Execute order with broker simulation"""
         try:
             # Simulate execution delay

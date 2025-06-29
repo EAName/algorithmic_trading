@@ -1,41 +1,47 @@
 import pandas as pd
 import numpy as np
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from .agent_base import Agent
 
 class StrategyAgent(Agent):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
-        self.symbol = config['trading']['symbol']
+        self.symbols = config['trading']['symbols']
+        self.primary_symbol = config['trading']['primary_symbol']
         self.capital = config['trading']['capital']
         self.max_position = config['risk']['max_position']
         self.max_drawdown = config['risk']['max_drawdown']
-        self.logger.info(f"Strategy agent initialized for {self.symbol} with capital {self.capital}")
+        self.data_buffers = {symbol: [] for symbol in self.symbols}
+        self.logger.info(f"Strategy agent initialized for symbols {self.symbols} with capital {self.capital}")
     
-    def act(self, data: pd.DataFrame) -> Dict[str, Any]:
+    def act(self, data: pd.DataFrame, symbol: str = None) -> Dict[str, Any]:
         """
         Analyze market data and generate trading signals.
         
         Args:
             data: DataFrame with OHLCV market data
+            symbol: Symbol to analyze (if None, uses primary symbol)
             
         Returns:
             Dictionary containing trading signal
         """
         try:
-            self.logger.info(f"Analyzing {len(data)} data points for {self.symbol}")
+            if symbol is None:
+                symbol = self.primary_symbol
+            
+            self.logger.info(f"Analyzing {len(data)} data points for {symbol}")
             
             # Validate data
             if data.empty:
-                self.logger.warning("Empty data received")
-                return self._generate_no_action_signal()
+                self.logger.warning(f"Empty data received for {symbol}")
+                return self._generate_no_action_signal(symbol)
             
             # Calculate technical indicators
             indicators = self._calculate_indicators(data)
             
             # Generate trading signal
-            signal = self._generate_signal(data, indicators)
+            signal = self._generate_signal(data, indicators, symbol)
             
             # Log the signal
             self.log_action(signal)
@@ -43,8 +49,64 @@ class StrategyAgent(Agent):
             return signal
             
         except Exception as e:
-            self.log_error(e, "Error in strategy analysis")
-            return self._generate_no_action_signal()
+            self.log_error(e, f"Error in strategy analysis for {symbol}")
+            return self._generate_no_action_signal(symbol)
+    
+    def process_realtime_data(self, data_type: str, data: Dict):
+        """
+        Process real-time data updates
+        
+        Args:
+            data_type: Type of data ('trade', 'quote', 'bar')
+            data: Data dictionary
+        """
+        try:
+            symbol = data.get('symbol')
+            if symbol not in self.symbols:
+                return
+            
+            # Store data in buffer
+            self.data_buffers[symbol].append({
+                'type': data_type,
+                'data': data,
+                'timestamp': data.get('timestamp')
+            })
+            
+            # Keep only recent data
+            max_buffer_size = 100
+            if len(self.data_buffers[symbol]) > max_buffer_size:
+                self.data_buffers[symbol] = self.data_buffers[symbol][-max_buffer_size:]
+            
+            # If we have enough bar data, analyze it
+            if data_type == 'bar' and len(self.data_buffers[symbol]) >= 20:
+                self._analyze_realtime_data(symbol)
+                
+        except Exception as e:
+            self.log_error(e, f"Error processing real-time data for {symbol}")
+    
+    def _analyze_realtime_data(self, symbol: str):
+        """Analyze real-time data and generate signals"""
+        try:
+            # Convert buffer data to DataFrame format
+            bar_data = [item['data'] for item in self.data_buffers[symbol] 
+                       if item['type'] == 'bar']
+            
+            if len(bar_data) < 20:
+                return
+            
+            # Create DataFrame from bar data
+            df = pd.DataFrame(bar_data)
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df.set_index('timestamp', inplace=True)
+            
+            # Generate signal
+            signal = self.act(df, symbol)
+            
+            if signal['action'] != 'hold':
+                self.logger.info(f"Real-time signal for {symbol}: {signal['action']} {signal['quantity']} @ {signal['price']}")
+                
+        except Exception as e:
+            self.log_error(e, f"Error analyzing real-time data for {symbol}")
     
     def _calculate_indicators(self, data: pd.DataFrame) -> Dict[str, Any]:
         """Calculate technical indicators from market data"""
@@ -81,11 +143,11 @@ class StrategyAgent(Agent):
             self.log_error(e, "Error calculating indicators")
             return {}
     
-    def _generate_signal(self, data: pd.DataFrame, indicators: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_signal(self, data: pd.DataFrame, indicators: Dict[str, Any], symbol: str) -> Dict[str, Any]:
         """Generate trading signal based on indicators"""
         try:
             if not indicators:
-                return self._generate_no_action_signal()
+                return self._generate_no_action_signal(symbol)
             
             current_price = data['close'].iloc[-1]
             current_volume = data['volume'].iloc[-1]
@@ -107,17 +169,17 @@ class StrategyAgent(Agent):
                 action = 'buy'
                 quantity = self._calculate_position_size(current_price)
                 confidence = 0.7
-                self.logger.info(f"BUY signal: Price {current_price} > SMA20 {sma_20}, RSI {rsi}")
+                self.logger.info(f"BUY signal for {symbol}: Price {current_price} > SMA20 {sma_20}, RSI {rsi}")
                 
             elif current_price < sma_20 or rsi > 80:
                 action = 'sell'
                 quantity = self._calculate_position_size(current_price)
                 confidence = 0.6
-                self.logger.info(f"SELL signal: Price {current_price} < SMA20 {sma_20}, RSI {rsi}")
+                self.logger.info(f"SELL signal for {symbol}: Price {current_price} < SMA20 {sma_20}, RSI {rsi}")
             
             return {
                 'action': action,
-                'symbol': self.symbol,
+                'symbol': symbol,
                 'quantity': quantity,
                 'price': current_price,
                 'confidence': confidence,
@@ -132,8 +194,8 @@ class StrategyAgent(Agent):
             }
             
         except Exception as e:
-            self.log_error(e, "Error generating signal")
-            return self._generate_no_action_signal()
+            self.log_error(e, f"Error generating signal for {symbol}")
+            return self._generate_no_action_signal(symbol)
     
     def _calculate_position_size(self, price: float) -> int:
         """Calculate position size based on risk management rules"""
@@ -155,11 +217,11 @@ class StrategyAgent(Agent):
             self.log_error(e, "Error calculating position size")
             return 1
     
-    def _generate_no_action_signal(self) -> Dict[str, Any]:
+    def _generate_no_action_signal(self, symbol: str) -> Dict[str, Any]:
         """Generate a no-action signal"""
         return {
             'action': 'hold',
-            'symbol': self.symbol,
+            'symbol': symbol,
             'quantity': 0,
             'price': 0,
             'confidence': 0.0,

@@ -2,7 +2,7 @@ import yaml
 import logging
 import sys
 from typing import Dict, Any
-from .orchestrator import run, run_backtest, run_live_trading
+from .orchestrator import run, run_backtest, run_realtime_trading
 from .logger_config import setup_logging
 
 def main():
@@ -66,41 +66,41 @@ def run_backtest_mode(config_path: str = 'config.yaml',
         print(f"Backtest error: {e}")
         sys.exit(1)
 
-def run_live_mode(config_path: str = 'config.yaml', duration_minutes: int = 60):
-    """Run the system in live trading mode"""
+def run_realtime_mode(config_path: str = 'config.yaml', duration_minutes: int = 60):
+    """Run the system in real-time trading mode"""
     try:
         config = load_config(config_path)
         setup_logging(config)
         logger = logging.getLogger(__name__)
         
-        logger.info("Running in live trading mode")
-        result = run_live_trading(config, duration_minutes)
+        logger.info("Running in real-time trading mode")
+        result = run_realtime_trading(config, duration_minutes)
         
         if result['success']:
-            logger.info(f"Live trading completed: {result['total_trades']} trades")
+            logger.info(f"Real-time trading completed: {result['total_trades']} trades")
         else:
-            logger.error(f"Live trading failed: {result['error']}")
+            logger.error(f"Real-time trading failed: {result['error']}")
             
     except Exception as e:
-        print(f"Live trading error: {e}")
+        print(f"Real-time trading error: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':
     import argparse
     
     parser = argparse.ArgumentParser(description='Algorithmic Trading System')
-    parser.add_argument('--mode', choices=['standard', 'backtest', 'live'], 
+    parser.add_argument('--mode', choices=['standard', 'backtest', 'realtime'], 
                        default='standard', help='Run mode')
     parser.add_argument('--config', default='config.yaml', help='Configuration file path')
     parser.add_argument('--start-date', default='2024-01-01', help='Backtest start date')
     parser.add_argument('--end-date', default='2024-12-31', help='Backtest end date')
-    parser.add_argument('--duration', type=int, default=60, help='Live trading duration (minutes)')
+    parser.add_argument('--duration', type=int, default=60, help='Real-time trading duration (minutes)')
     
     args = parser.parse_args()
     
     if args.mode == 'backtest':
         run_backtest_mode(args.config, args.start_date, args.end_date)
-    elif args.mode == 'live':
-        run_live_mode(args.config, args.duration)
+    elif args.mode == 'realtime':
+        run_realtime_mode(args.config, args.duration)
     else:
         main()

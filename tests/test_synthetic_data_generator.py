@@ -20,8 +20,10 @@ class TestSyntheticDataGenerator:
                 'noise_level': 0.005
             },
             'trading': {
-                'symbol': 'AAPL',
-                'timeframe': '1min'
+                'symbols': ['AAPL'],
+                'primary_symbol': 'AAPL',
+                'timeframe': '1min',
+                'capital': 100000
             }
         }
     

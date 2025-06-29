@@ -1,14 +1,15 @@
 import pandas as pd
 import logging
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from .synthetic_data_generator import SyntheticDataGenerator
+from .real_time_data_stream import AlpacaDataStream
 
 logger = logging.getLogger(__name__)
 
 def load_data(config: Dict[str, Any]) -> pd.DataFrame:
     """
-    Load market data from file or generate synthetic data if needed.
+    Load market data from file, generate synthetic data, or use real-time data.
     
     Args:
         config: Configuration dictionary
@@ -26,6 +27,8 @@ def load_data(config: Dict[str, Any]) -> pd.DataFrame:
             return _load_csv_data(config)
         elif data_type == 'synthetic':
             return _generate_synthetic_data(config)
+        elif data_type == 'realtime':
+            return _load_realtime_data(config)
         else:
             raise ValueError(f"Unsupported data source type: {data_type}")
             
@@ -73,7 +76,7 @@ def _generate_synthetic_data(config: Dict[str, Any]) -> pd.DataFrame:
         
         # Generate OHLCV data
         df = generator.generate_ohlcv_data(
-            symbol=config['trading']['symbol'],
+            symbol=config['trading'].get('primary_symbol', config['trading']['symbols'][0]),
             start_date='2024-01-01',
             end_date='2024-12-31',
             frequency=config['trading']['timeframe']
@@ -89,6 +92,90 @@ def _generate_synthetic_data(config: Dict[str, Any]) -> pd.DataFrame:
     except Exception as e:
         logger.error(f"Error generating synthetic data: {e}", exc_info=True)
         raise
+
+def _load_realtime_data(config: Dict[str, Any]) -> pd.DataFrame:
+    """Load real-time data from Alpaca Markets"""
+    logger.info("Loading real-time data from Alpaca Markets")
+    
+    try:
+        # Initialize Alpaca data stream
+        data_stream = AlpacaDataStream(config)
+        
+        # Get historical data for initial setup
+        symbol = config['trading'].get('primary_symbol', config['trading']['symbols'][0])
+        start_date = config['realtime_data'].get('start_date', '2024-01-01')
+        end_date = config['realtime_data'].get('end_date', '2024-12-31')
+        
+        df = data_stream.get_historical_data(symbol, start_date, end_date)
+        
+        if df.empty:
+            logger.warning(f"No historical data available for {symbol}, falling back to synthetic data")
+            return _generate_synthetic_data(config)
+        
+        logger.info(f"Successfully loaded {len(df)} historical data points for {symbol}")
+        
+        # Store the data stream in config for later use
+        config['_data_stream'] = data_stream
+        
+        return df
+        
+    except Exception as e:
+        logger.error(f"Error loading real-time data: {e}", exc_info=True)
+        logger.info("Falling back to synthetic data")
+        return _generate_synthetic_data(config)
+
+def get_realtime_data_stream(config: Dict[str, Any]) -> Optional[AlpacaDataStream]:
+    """
+    Get the real-time data stream if available
+    
+    Args:
+        config: Configuration dictionary
+        
+    Returns:
+        AlpacaDataStream instance if available, None otherwise
+    """
+    return config.get('_data_stream')
+
+def start_realtime_stream(config: Dict[str, Any], callback: callable = None):
+    """
+    Start the real-time data stream
+    
+    Args:
+        config: Configuration dictionary
+        callback: Optional callback function for data updates
+    """
+    try:
+        data_stream = get_realtime_data_stream(config)
+        
+        if data_stream is None:
+            logger.warning("No real-time data stream available")
+            return
+        
+        if callback:
+            data_stream.add_data_callback(callback)
+        
+        data_stream.connect()
+        logger.info("Real-time data stream started")
+        
+    except Exception as e:
+        logger.error(f"Error starting real-time stream: {e}", exc_info=True)
+
+def stop_realtime_stream(config: Dict[str, Any]):
+    """
+    Stop the real-time data stream
+    
+    Args:
+        config: Configuration dictionary
+    """
+    try:
+        data_stream = get_realtime_data_stream(config)
+        
+        if data_stream:
+            data_stream.disconnect()
+            logger.info("Real-time data stream stopped")
+        
+    except Exception as e:
+        logger.error(f"Error stopping real-time stream: {e}", exc_info=True)
 
 def validate_data(df: pd.DataFrame) -> bool:
     """
@@ -111,10 +198,11 @@ def validate_data(df: pd.DataFrame) -> bool:
             logger.error(f"Missing required columns: {missing_columns}")
             return False
         
-        # Check for null values
+        # Check for null values - fail if any nulls in required columns
         null_counts = df[required_columns].isnull().sum()
         if null_counts.sum() > 0:
-            logger.warning(f"Found null values: {null_counts.to_dict()}")
+            logger.error(f"Found null values: {null_counts.to_dict()}")
+            return False
         
         # Check for negative prices
         price_columns = ['open', 'high', 'low', 'close']
@@ -128,14 +216,15 @@ def validate_data(df: pd.DataFrame) -> bool:
             logger.error("Found negative volumes in data")
             return False
         
-        # Check OHLC consistency
-        invalid_ohlc = (
-            (df['high'] < df['low']) |
-            (df['open'] > df['high']) |
-            (df['open'] < df['low']) |
-            (df['close'] > df['high']) |
-            (df['close'] < df['low'])
-        )
+        # Check OHLC consistency - more flexible logic
+        # High should be >= Low
+        invalid_high_low = (df['high'] < df['low'])
+        
+        # Open and Close should be between High and Low (inclusive)
+        invalid_open = (df['open'] > df['high']) | (df['open'] < df['low'])
+        invalid_close = (df['close'] > df['high']) | (df['close'] < df['low'])
+        
+        invalid_ohlc = invalid_high_low | invalid_open | invalid_close
         
         if invalid_ohlc.any():
             logger.error(f"Found {invalid_ohlc.sum()} rows with invalid OHLC data")
